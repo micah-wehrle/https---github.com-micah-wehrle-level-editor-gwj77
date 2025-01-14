@@ -43,10 +43,12 @@ const dataOutput: HTMLInputElement = document.getElementById('data-output') as H
 
 const undoBtn: HTMLButtonElement = document.getElementById('undo-btn') as HTMLButtonElement;
 const redoBtn: HTMLButtonElement = document.getElementById('redo-btn') as HTMLButtonElement;
-const undoStack = [];
+const undoStack: Tile[][][] = []; // lol 
+let undoPointer = 0;
+const maxUndo = 21;
 
-let width = 10;
-let height = 7;
+let width = 18;
+let height = 12;
 
 let buttonSize = 30;
 const buttonMin = 20;
@@ -149,7 +151,57 @@ for (let i = 0; i < toolTypes.length; i++) {
 }
 
 
-const grid: Tile[][] = [];
+let grid: Tile[][] = [];
+
+const updateUndoButtons = () => {
+  undoBtn.disabled = (undoPointer === undoStack.length - 1);
+  redoBtn.disabled = (undoPointer === 0);
+}
+const addUndo = (inputGrid: Tile[][]) => {
+
+  // TODO add adjustment for if the grid size changes
+  while (undoPointer > 0) {
+    undoPointer --;
+    undoStack.shift();
+  }
+  undoStack.unshift(structuredClone(inputGrid));
+  if (undoStack.length > maxUndo) {
+    undoStack.length = maxUndo;
+  }
+  updateUndoButtons();
+}
+const updateGridFromUndoStack = () => {
+  grid = undoStack[undoPointer];
+  updateUndoButtons();
+  drawGrid();
+}
+const doUndo = () => {
+  if (undoPointer < undoStack.length - 1) {
+    undoPointer++;
+    updateGridFromUndoStack();
+  }
+}
+const doRedo = () => {
+  if (undoPointer > 0) {
+    undoPointer--;
+    updateGridFromUndoStack();
+  }
+}
+
+undoBtn.addEventListener('click', (ev:any) => {
+  if (ev?.target?.disabled) {
+    return;
+  }
+  doUndo();
+});
+
+redoBtn.addEventListener('click', (ev:any) => {
+  if (ev?.target?.disabled) {
+    return;
+  }
+
+  doRedo();
+});
 
 gridWidthForm?.addEventListener('change', (ev: any) => {
   const newWidth = Number(ev?.target?.value);
@@ -355,6 +407,7 @@ for (let y = 0; y < height; y++) {
   }
   grid.push(row);
 }
+undoStack.push(structuredClone(grid));
 
 // Handle clicks on the grid
 gridHolder?.addEventListener('mousedown', (ev: any) => {
@@ -498,6 +551,8 @@ gridHolder?.addEventListener('mousedown', (ev: any) => {
       ev.target.innerHTML = grid[clicked[0]][clicked[1]].powerup;
     }
   }
+
+  addUndo(grid);
 
 })
 

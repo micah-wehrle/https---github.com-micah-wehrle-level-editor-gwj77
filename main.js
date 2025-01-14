@@ -33,9 +33,11 @@ var gridHeightForm = document.getElementById('grid-height');
 var dataOutput = document.getElementById('data-output');
 var undoBtn = document.getElementById('undo-btn');
 var redoBtn = document.getElementById('redo-btn');
-var undoStack = [];
-var width = 10;
-var height = 7;
+var undoStack = []; // lol 
+var undoPointer = 0;
+var maxUndo = 21;
+var width = 18;
+var height = 12;
 var buttonSize = 30;
 var buttonMin = 20;
 var buttonMax = 140;
@@ -135,6 +137,53 @@ for (var i = 0; i < toolTypes.length; i++) {
     _loop_2(i);
 }
 var grid = [];
+var updateUndoButtons = function () {
+    undoBtn.disabled = (undoPointer === undoStack.length - 1);
+    redoBtn.disabled = (undoPointer === 0);
+};
+var addUndo = function (inputGrid) {
+    // TODO add adjustment for if the grid size changes
+    while (undoPointer > 0) {
+        undoPointer--;
+        undoStack.shift();
+    }
+    undoStack.unshift(structuredClone(inputGrid));
+    if (undoStack.length > maxUndo) {
+        undoStack.length = maxUndo;
+    }
+    updateUndoButtons();
+};
+var updateGridFromUndoStack = function () {
+    grid = undoStack[undoPointer];
+    updateUndoButtons();
+    drawGrid();
+};
+var doUndo = function () {
+    if (undoPointer < undoStack.length - 1) {
+        undoPointer++;
+        updateGridFromUndoStack();
+    }
+};
+var doRedo = function () {
+    if (undoPointer > 0) {
+        undoPointer--;
+        updateGridFromUndoStack();
+    }
+};
+undoBtn.addEventListener('click', function (ev) {
+    var _a;
+    if ((_a = ev === null || ev === void 0 ? void 0 : ev.target) === null || _a === void 0 ? void 0 : _a.disabled) {
+        return;
+    }
+    doUndo();
+});
+redoBtn.addEventListener('click', function (ev) {
+    var _a;
+    if ((_a = ev === null || ev === void 0 ? void 0 : ev.target) === null || _a === void 0 ? void 0 : _a.disabled) {
+        return;
+    }
+    doRedo();
+});
 gridWidthForm === null || gridWidthForm === void 0 ? void 0 : gridWidthForm.addEventListener('change', function (ev) {
     var _a, _b;
     var newWidth = Number((_a = ev === null || ev === void 0 ? void 0 : ev.target) === null || _a === void 0 ? void 0 : _a.value);
@@ -316,6 +365,7 @@ for (var y = 0; y < height; y++) {
     }
     grid.push(row);
 }
+undoStack.push(structuredClone(grid));
 // Handle clicks on the grid
 gridHolder === null || gridHolder === void 0 ? void 0 : gridHolder.addEventListener('mousedown', function (ev) {
     // Ignore clicks that aren't on grid buttons
@@ -442,5 +492,6 @@ gridHolder === null || gridHolder === void 0 ? void 0 : gridHolder.addEventListe
             ev.target.innerHTML = grid[clicked[0]][clicked[1]].powerup;
         }
     }
+    addUndo(grid);
 });
 drawGrid();
