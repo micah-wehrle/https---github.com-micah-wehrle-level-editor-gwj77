@@ -29,23 +29,17 @@
     }
 
 
-    .grid-btn.empty {
+    .grid-btn.em {
       background-color: black;
     }
     .grid-btn.bg {
       background-color: lightgray;
     }
-    .grid-btn.wall {
+    .grid-btn.wa {
       background-color: rgb(157, 134, 104);
     }
-    .grid-btn.dark {
+    .grid-btn.dk {
       background-color: rgb(98, 20, 20);
-    }
-    .grid-btn.border-wall {
-      background-color: rgb(34, 34, 34);
-    }
-    .grid-btn.border-dark {
-      background-color: rgb(67, 0, 0);
     }
     
   </style>
@@ -59,8 +53,15 @@
           <div class="container-fluid">
             <a class="navbar-brand">Level Builder</a>
           </div>
-          <button class="btn btn-sm btn-success" id="plus-btn">+</button>
-          <button class="btn btn-sm btn-success" id="minus-btn">-</button>
+          <div class="container">
+            Zoom:
+            <button class="btn btn-sm btn-success" id="plus-btn">+</button>
+            <button class="btn btn-sm btn-success me-4" id="minus-btn">-</button>
+            <button class="btn btn-sm btn-secondary" id="undo-btn" disabled>Undo</button>
+            <button class="btn btn-sm btn-secondary" id="redo-btn" disabled>Redo</button>
+
+          </div>
+          
         </div>
       </div>
       <hr>
@@ -79,10 +80,18 @@
   <div id="grid-holder"></div>
   <div style="height:50px"></div>
   <input type="text" id="data-output">
+  <button id="import-btn">Import</button>
   <button id="export-btn">Export</button>
   <div style="height:200px"></div>
   <nav class="navbar fixed-bottom navbar-light bg-light">
-    <div class="d-flex" id="tile-btn-wrapper"></div>
+    <div class="container d-grid">
+      <div class="row mb-2">
+        <div class="d-flex" id="tool-btn-wrapper"></div>
+      </div>
+      <div class="row">
+        <div class="d-flex" id="tile-btn-wrapper"></div>
+      </div>
+    </div>
   </nav>
 </body>
 <script src="main.js"></script>
