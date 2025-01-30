@@ -41,6 +41,10 @@ const gridWidthForm: HTMLInputElement = document.getElementById('grid-width') as
 const gridHeightForm: HTMLInputElement = document.getElementById('grid-height') as HTMLInputElement;
 const dataOutput: HTMLInputElement = document.getElementById('data-output') as HTMLInputElement;
 
+const titleField: HTMLInputElement = document.getElementById('level-title') as HTMLInputElement;
+const levelCode1: HTMLInputElement = document.getElementById('level-code1') as HTMLInputElement;
+const levelCode2: HTMLInputElement = document.getElementById('level-code2') as HTMLInputElement;
+
 const undoBtn: HTMLButtonElement = document.getElementById('undo-btn') as HTMLButtonElement;
 const redoBtn: HTMLButtonElement = document.getElementById('redo-btn') as HTMLButtonElement;
 const undoStack: Tile[][][] = []; // lol 
@@ -297,10 +301,19 @@ const drawGrid = () => {
   
 }
 
+const scrubIllegalCharacters = (input: string): string => {
+  const illegalCharacters = ['|', ':', '-', '~', '^'];
+  for (let illegal of illegalCharacters) {
+    input.replaceAll(illegal, '*');
+  }
+  return input;
+}
+
 
 // Export button
 document.getElementById('export-btn')?.addEventListener('mousedown', () => {
-  let output = `size:${width},${height}|ver:${VERSION}|tiles:`;
+  
+  let output = `size:${width},${height}|ver:${VERSION}|title:${scrubIllegalCharacters(titleField.value)}|code:${scrubIllegalCharacters(levelCode1.value) + '-' + scrubIllegalCharacters(levelCode2.value)}|tiles:`;
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
       output = output + grid[y][x].export() + (x === grid[y].length - 1 ? '' : '~');
@@ -314,7 +327,19 @@ document.getElementById('export-btn')?.addEventListener('mousedown', () => {
 
 // Import button
 document.getElementById('import-btn')?.addEventListener('click', () => {
-  if (!confirm('Overwrite current level?')) {
+  //check if level has anything in it.
+  let foundEdit = false;
+  for (let row of grid) {
+    for (let cell of row) {
+      if (cell.type !== buttonTypes[0] || cell.hasPlayer || cell.powerup !== '') { // should be empty, 'em'
+        foundEdit = true;
+        break;
+      }
+    }
+    if (foundEdit)
+      break;
+  }
+  if (foundEdit && !confirm('Overwrite current level?')) {
     return;
   }
 
@@ -349,6 +374,11 @@ document.getElementById('import-btn')?.addEventListener('click', () => {
   }
 
   // VERSION 2 PROCESS:
+  titleField.value = metadata['title'] ?? '';
+  const levelCodes = metadata['code']?.split('-') ?? ['',''];
+  levelCode1.value = levelCodes[0];
+  levelCode2.value = levelCodes[1];
+
   const size = metadata['size'].split(',').map(e => Number(e));
   width = size[0];
   height = size[1];

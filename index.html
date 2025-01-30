@@ -78,12 +78,41 @@
     </div>
   </nav>
   <div id="grid-holder"></div>
-  <div style="height:50px"></div>
-  <input type="text" id="data-output">
-  <button id="import-btn">Import</button>
-  <button id="export-btn">Export</button>
+  <div class="container">
+    <div style="height:50px"></div>
+    <div class="row g-3 align-items-center mt-2">
+      <div class="col-auto">
+        <label for="title" class="col-form-label">Level Title</label>
+      </div>
+      <div class="col-auto">
+        <input type="text" id="level-title" class="form-control" placeholder="Level Title. . .">
+      </div>
+    </div>
+    <div class="row g-3 align-items-center mt-2">
+      <div class="col-auto">
+        <label for="title" class="col-form-label">Level Code</label>
+      </div>
+      <div class="col-auto">
+        <div class="d-flex">
+          <input type="text" id="level-code1" class="form-control" size="4" placeholder="ex. 1"> 
+          -
+          <input type="text" id="level-code2" class="form-control" size="4" placeholder="ex. 1">
+
+        </div>
+      </div>
+    </div>
+    <div class="row g-3 align-items-center mt-2">
+      <div class="col-auto">
+        <input type="text" id="data-output">
+      </div>
+      <div class="col-auto">
+        <button id="import-btn">Import</button>
+        <button id="export-btn">Export</button>
+      </div>
+    </div>
+  </div>
   <div style="height:200px"></div>
-  <nav class="navbar fixed-bottom navbar-light bg-light">
+  <nav class="navbar fixed-bottom navbar-light bg-light" style="border: solid; border-color: black;">
     <div class="container d-grid">
       <div class="row mb-2">
         <div class="d-flex" id="tool-btn-wrapper"></div>

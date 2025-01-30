@@ -31,6 +31,9 @@ var gridHolder = document.getElementById('grid-holder');
 var gridWidthForm = document.getElementById('grid-width');
 var gridHeightForm = document.getElementById('grid-height');
 var dataOutput = document.getElementById('data-output');
+var titleField = document.getElementById('level-title');
+var levelCode1 = document.getElementById('level-code1');
+var levelCode2 = document.getElementById('level-code2');
 var undoBtn = document.getElementById('undo-btn');
 var redoBtn = document.getElementById('redo-btn');
 var undoStack = []; // lol 
@@ -267,9 +270,17 @@ var drawGrid = function () {
     data = data + '</div>';
     gridHolder.innerHTML = data;
 };
+var scrubIllegalCharacters = function (input) {
+    var illegalCharacters = ['|', ':', '-', '~', '^'];
+    for (var _i = 0, illegalCharacters_1 = illegalCharacters; _i < illegalCharacters_1.length; _i++) {
+        var illegal = illegalCharacters_1[_i];
+        input.replaceAll(illegal, '*');
+    }
+    return input;
+};
 // Export button
 (_f = document.getElementById('export-btn')) === null || _f === void 0 ? void 0 : _f.addEventListener('mousedown', function () {
-    var output = "size:".concat(width, ",").concat(height, "|ver:").concat(VERSION, "|tiles:");
+    var output = "size:".concat(width, ",").concat(height, "|ver:").concat(VERSION, "|title:").concat(scrubIllegalCharacters(titleField.value), "|code:").concat(scrubIllegalCharacters(levelCode1.value) + '-' + scrubIllegalCharacters(levelCode2.value), "|tiles:");
     for (var y = 0; y < grid.length; y++) {
         for (var x = 0; x < grid[y].length; x++) {
             output = output + grid[y][x].export() + (x === grid[y].length - 1 ? '' : '~');
@@ -282,13 +293,28 @@ var drawGrid = function () {
 });
 // Import button
 (_g = document.getElementById('import-btn')) === null || _g === void 0 ? void 0 : _g.addEventListener('click', function () {
-    if (!confirm('Overwrite current level?')) {
+    var _a, _b, _c;
+    //check if level has anything in it.
+    var foundEdit = false;
+    for (var _i = 0, grid_1 = grid; _i < grid_1.length; _i++) {
+        var row = grid_1[_i];
+        for (var _d = 0, row_1 = row; _d < row_1.length; _d++) {
+            var cell = row_1[_d];
+            if (cell.type !== buttonTypes[0] || cell.hasPlayer || cell.powerup !== '') { // should be empty, 'em'
+                foundEdit = true;
+                break;
+            }
+        }
+        if (foundEdit)
+            break;
+    }
+    if (foundEdit && !confirm('Overwrite current level?')) {
         return;
     }
     var metadataSplit = dataOutput.value.split('|').map(function (e) { return e.split(':'); });
     var metadata = {};
-    for (var _i = 0, metadataSplit_1 = metadataSplit; _i < metadataSplit_1.length; _i++) {
-        var mdPart = metadataSplit_1[_i];
+    for (var _e = 0, metadataSplit_1 = metadataSplit; _e < metadataSplit_1.length; _e++) {
+        var mdPart = metadataSplit_1[_e];
         metadata[mdPart[0]] = mdPart[1];
     }
     var dataVersion = Number(metadata['ver']);
@@ -306,14 +332,18 @@ var drawGrid = function () {
                 ['ent-player', 'en-pl'],
                 ['ent-pickup', 'en-pu']
             ];
-            for (var _a = 0, replacements_1 = replacements; _a < replacements_1.length; _a++) {
-                var replace = replacements_1[_a];
+            for (var _f = 0, replacements_1 = replacements; _f < replacements_1.length; _f++) {
+                var replace = replacements_1[_f];
                 rawLevelData = rawLevelData.replaceAll(replace[0], replace[1]);
             }
         }
         dataVersion++;
     }
     // VERSION 2 PROCESS:
+    titleField.value = (_a = metadata['title']) !== null && _a !== void 0 ? _a : '';
+    var levelCodes = (_c = (_b = metadata['code']) === null || _b === void 0 ? void 0 : _b.split('-')) !== null && _c !== void 0 ? _c : ['', ''];
+    levelCode1.value = levelCodes[0];
+    levelCode2.value = levelCodes[1];
     var size = metadata['size'].split(',').map(function (e) { return Number(e); });
     width = size[0];
     height = size[1];
@@ -322,19 +352,19 @@ var drawGrid = function () {
     grid.length = 0;
     var rows = rawLevelData.split('^');
     var rowI = 0;
-    for (var _b = 0, rows_1 = rows; _b < rows_1.length; _b++) {
-        var row = rows_1[_b];
+    for (var _g = 0, rows_1 = rows; _g < rows_1.length; _g++) {
+        var row = rows_1[_g];
         grid.push([]);
         var tiles = row.split('~');
         var colI = 0;
-        for (var _c = 0, tiles_1 = tiles; _c < tiles_1.length; _c++) {
-            var tile = tiles_1[_c];
+        for (var _h = 0, tiles_1 = tiles; _h < tiles_1.length; _h++) {
+            var tile = tiles_1[_h];
             var tileType = '';
             var hasPlayer = false;
             var powerup = '';
             var tileDatas = tile.split(';');
-            for (var _d = 0, tileDatas_1 = tileDatas; _d < tileDatas_1.length; _d++) {
-                var tileData = tileDatas_1[_d];
+            for (var _j = 0, tileDatas_1 = tileDatas; _j < tileDatas_1.length; _j++) {
+                var tileData = tileDatas_1[_j];
                 if (tileData === 'PU') {
                     powerup = 'PU';
                 }
